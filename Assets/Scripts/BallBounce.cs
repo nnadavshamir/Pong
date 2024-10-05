@@ -7,7 +7,8 @@ public class BallBounce : MonoBehaviour
 {
     public Ball ball;
     public ScoreManager scoreManager;
-    
+    private GameObject lastPlayerToHit;
+
     void Bounce(Collision2D collision)
     {
         Vector3 ballPos = transform.position;
@@ -33,8 +34,10 @@ public class BallBounce : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D other)
     {
+        
         if (other.gameObject.name == "Player 1" || other.gameObject.name == "Player 2")
         {
+            lastPlayerToHit = other.gameObject;
             Bounce(other);
         }
         else if (other.gameObject.name == "Right Wall")
@@ -46,6 +49,20 @@ public class BallBounce : MonoBehaviour
         {
             scoreManager.Player2Goal();
             StartCoroutine( ball.FirstMove());
+        }
+    }
+    
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("PowerUp"))
+        {
+            if (lastPlayerToHit != null)
+            {
+                // Apply the power-up to the last player to hit the ball
+                collision.gameObject.GetComponent<PowerUp>().ApplyEffect(lastPlayerToHit);
+            }
+
+            Destroy(collision.gameObject); // Destroy the power-up after collection
         }
     }
 }
